@@ -497,7 +497,7 @@ function renderGraph() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 1. Fetch current theme colors from the live CSS
+    // 1. Fetch current theme colors dynamically from CSS variables
     const style = getComputedStyle(document.body);
     const colorPage = style.getPropertyValue('--graph-node-page').trim();
     const colorTag = style.getPropertyValue('--graph-node-tag').trim();
@@ -507,35 +507,41 @@ function renderGraph() {
     ctx.save();
     ctx.translate(panX, panY);
 
-    // 2. Update Edges
+    // 2. Draw Edges (Lines)
     graphEdges.forEach(e => {
-      const a = graphNodes.find(n=>n.id===e.from), b = graphNodes.find(n=>n.id===e.to);
-      if(!a||!b) return;
+      const a = graphNodes.find(n => n.id === e.from), b = graphNodes.find(n => n.id === e.to);
+      if (!a || !b) return;
       ctx.beginPath();
-      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.moveTo(a.x, a.y); 
+      ctx.lineTo(b.x, b.y);
+      // Use the dynamic edge color from CSS
       ctx.strokeStyle = e.wikilink ? 'rgba(124,109,250,0.4)' : colorEdge;
       ctx.lineWidth = e.wikilink ? 1.5 : 1;
       ctx.stroke();
     });
 
-    // 3. Update Nodes and Text
+    // 3. Draw Nodes (Circles) and Labels
     graphNodes.forEach(n => {
       ctx.beginPath();
-      ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      // Use the dynamic node colors (purple for pages, green for tags)
       ctx.fillStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.globalAlpha = 0.85;
       ctx.fill();
       ctx.globalAlpha = 1;
+      
+      // Define node borders
       ctx.strokeStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
+      // Handle label length and styling
       const maxLen = n.type === 'page' ? 14 : 10;
-      const label = n.label.length > maxLen ? n.label.slice(0, maxLen)+'…' : n.label;
+      const label = n.label.length > maxLen ? n.label.slice(0, maxLen) + '…' : n.label;
       
-      // 4. Use the dynamic text color (now #1d1d1f in light mode)
+      // 4. Use the dynamic text color (light in dark mode, dark in light mode)
       ctx.fillStyle = colorText;
-      ctx.font = `${n.type==='page'?'11px':'10px'} "DM Sans", sans-serif`;
+      ctx.font = `${n.type === 'page' ? '11px' : '10px'} "DM Sans", sans-serif`;
       ctx.textAlign = 'center';
       ctx.fillText(label, n.x, n.y + n.r + 12);
     });
