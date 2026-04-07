@@ -738,3 +738,93 @@ themeBtn.addEventListener('click', () => {
     addLog('edit', 'Switched to dark mode');
   }
 });
+
+// ════════════════════════════════════════════════════
+//  ADVANCED SEARCH & MENTIONS
+// ════════════════════════════════════════════════════
+
+// 1. GLOBAL SEARCH LOGIC
+const searchModal = document.getElementById('search-modal');
+const searchInput = document.getElementById('global-search-input');
+const searchResults = document.getElementById('search-results');
+
+// Shortcut: Cmd+K or Ctrl+K
+window.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    searchModal.style.display = 'flex';
+    searchInput.focus();
+  }
+  if (e.key === 'Escape') searchModal.style.display = 'none';
+});
+
+searchInput.addEventListener('input', () => {
+  const query = searchInput.value.toLowerCase();
+  const pages = Object.values(userWiki());
+  searchResults.innerHTML = '';
+
+  if (!query) return;
+
+  const filtered = pages.filter(p => 
+    p.title.toLowerCase().includes(query) || 
+    p.content.toLowerCase().includes(query) ||
+    p.tags.some(t => t.toLowerCase().includes(query))
+  );
+
+  filtered.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    const snippet = p.content.substring(0, 80).replace(/\n/g, ' ') + '...';
+    el.innerHTML = `<div class="title">${esc(p.title)}</div><div class="snippet">${esc(snippet)}</div>`;
+    el.onclick = () => {
+      openPage(p.id);
+      searchModal.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+
+// 2. UNLINKED MENTIONS LOGIC
+function renderUnlinkedMentions() {
+  const currentP = userWiki()[currentPageId];
+  if (!currentP) return;
+  
+  const list = document.getElementById('mentions-list');
+  list.innerHTML = '';
+  
+  const allPages = Object.values(userWiki());
+  const currentTitle = currentP.title.toLowerCase();
+
+  if (!currentTitle || currentTitle === 'untitled') return;
+
+  allPages.forEach(other => {
+    // Don't check the current page against itself
+    if (other.id === currentPageId) return;
+
+    const content = other.content.toLowerCase();
+    // Check if the other page mentions this title BUT doesn't use [[brackets]]
+    const hasMention = content.includes(currentTitle);
+    const hasStrictLink = content.includes(`[[${currentTitle}]]`);
+
+    if (hasMention && !hasStrictLink) {
+      const el = document.createElement('div');
+      el.className = 'mention-item';
+      el.innerHTML = `<strong>${esc(other.title)}</strong><br><span style="color:var(--text3)">Mentions "${currentTitle}"</span>`;
+      el.onclick = () => openPage(other.id);
+      list.appendChild(el);
+    }
+  });
+
+  if (list.innerHTML === '') {
+    list.innerHTML = '<div style="color:var(--text3)">No unlinked mentions found.</div>';
+  }
+}
+
+// 3. HOOK INTO OPEN PAGE
+// Update your existing openPage(id) function to call renderUnlinkedMentions()
+const originalOpenPage = openPage;
+openPage = function(id) {
+  originalOpenPage(id);
+  renderUnlinkedMentions();
+};
