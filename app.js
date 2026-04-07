@@ -494,11 +494,10 @@ function renderGraph() {
     });
   }
 
-  // Inside renderGraph() in app.js
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Get current theme colors from CSS
+    // 1. Fetch current theme colors from the live CSS
     const style = getComputedStyle(document.body);
     const colorPage = style.getPropertyValue('--graph-node-page').trim();
     const colorTag = style.getPropertyValue('--graph-node-tag').trim();
@@ -508,27 +507,25 @@ function renderGraph() {
     ctx.save();
     ctx.translate(panX, panY);
 
+    // 2. Update Edges
     graphEdges.forEach(e => {
       const a = graphNodes.find(n=>n.id===e.from), b = graphNodes.find(n=>n.id===e.to);
       if(!a||!b) return;
       ctx.beginPath();
       ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-      // Use the dynamic edge color
       ctx.strokeStyle = e.wikilink ? 'rgba(124,109,250,0.4)' : colorEdge;
       ctx.lineWidth = e.wikilink ? 1.5 : 1;
       ctx.stroke();
     });
 
+    // 3. Update Nodes and Text
     graphNodes.forEach(n => {
       ctx.beginPath();
       ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-      // Use the dynamic node colors
       ctx.fillStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.globalAlpha = 0.85;
       ctx.fill();
       ctx.globalAlpha = 1;
-      
-      // Add a slight border for better definition in Light Mode
       ctx.strokeStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.lineWidth = 1.5;
       ctx.stroke();
@@ -536,7 +533,7 @@ function renderGraph() {
       const maxLen = n.type === 'page' ? 14 : 10;
       const label = n.label.length > maxLen ? n.label.slice(0, maxLen)+'…' : n.label;
       
-      // Use the dynamic text color
+      // 4. Use the dynamic text color (now #1d1d1f in light mode)
       ctx.fillStyle = colorText;
       ctx.font = `${n.type==='page'?'11px':'10px'} "DM Sans", sans-serif`;
       ctx.textAlign = 'center';
