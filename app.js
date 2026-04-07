@@ -715,3 +715,26 @@ function fmtDateTime(ts) {
 
 // Window resize: redraw graph
 window.addEventListener('resize', () => { if (currentView === 'graph') renderGraph(); });
+
+// ════════════════════════════════════════════════════
+//  THEME TOGGLE
+// ════════════════════════════════════════════════════
+const themeBtn = document.getElementById('theme-toggle');
+
+// Check for saved user preference on load
+if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-mode');
+}
+
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+  
+  // Save preference
+  if (document.body.classList.contains('light-mode')) {
+    localStorage.setItem('theme', 'light');
+    addLog('edit', 'Switched to light mode');
+  } else {
+    localStorage.setItem('theme', 'dark');
+    addLog('edit', 'Switched to dark mode');
+  }
+});
