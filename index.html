@@ -375,6 +375,24 @@ textarea#note-content::placeholder { color: var(--text3); }
 .ai-msg.system { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-style: italic; font-size: 12px; }
 .ai-msg.loading { color: var(--text3); font-style: italic; }
 
+/* Ensure markdown elements inside AI messages look correct */
+.ai-msg.assistant p { margin-bottom: 10px; }
+.ai-msg.assistant p:last-child { margin-bottom: 0; }
+.ai-msg.assistant ul, .ai-msg.assistant ol { margin-left: 20px; margin-bottom: 10px; }
+.ai-msg.assistant code { 
+  background: var(--bg); 
+  padding: 2px 4px; 
+  border-radius: 4px; 
+  font-family: var(--font-mono); 
+}
+.ai-msg.assistant pre { 
+  background: var(--bg); 
+  padding: 10px; 
+  border-radius: var(--radius); 
+  overflow-x: auto; 
+  margin-bottom: 10px;
+}
+
 .ai-action-btns { padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid var(--border); }
 .ai-quick-btn {
   font-size: 11px;
@@ -651,6 +669,7 @@ textarea#note-content::placeholder { color: var(--text3); }
   to   { opacity: 1; transform: translateY(0); }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -1075,7 +1094,16 @@ document.querySelectorAll('.ai-quick-btn').forEach(btn => {
 function addAIMsg(text, role) {
   const el = document.createElement('div');
   el.className = 'ai-msg ' + role;
-  el.textContent = text;
+  
+  // If the role is assistant, parse the markdown. 
+  // If it's user or system, keep it simple.
+  if (role.includes('assistant')) {
+    // marked.parse() converts Markdown string to HTML string
+    el.innerHTML = marked.parse(text);
+  } else {
+    el.textContent = text;
+  }
+
   const msgs = document.getElementById('ai-msgs');
   msgs.appendChild(el);
   msgs.scrollTop = msgs.scrollHeight;
@@ -1111,19 +1139,14 @@ async function sendAI() {
     });
 
     const data = await res.json();
-    loading.className = 'ai-msg assistant';
+    const answer = data.response || data.result?.response;
 
-    // Check all possible locations where Gemma 4 stores the text
-    const answer = data.response || 
-                   data.result?.response || 
-                   data.choices?.[0]?.message?.content;
-
+    loading.className = 'ai-msg assistant'; // Remove 'loading' class
     if (answer) {
-      loading.textContent = answer;
+      // Parse the final answer into HTML
+      loading.innerHTML = marked.parse(answer);
     } else {
-      // This helps you see what actually came back if it's not 'answer'
-      console.error("Unexpected Data Structure:", data);
-      loading.textContent = "Error: Received unexpected data format from AI.";
+      loading.textContent = "Error: No response received.";
     }
   } catch (err) {
     loading.className = 'ai-msg assistant';
