@@ -1139,14 +1139,25 @@ async function sendAI() {
     });
 
     const data = await res.json();
-    const answer = data.response || data.result?.response;
+    loading.className = 'ai-msg assistant';
 
-    loading.className = 'ai-msg assistant'; // Remove 'loading' class
+    // Gemma 4 often nests the text in 'response' or 'result.response'
+    let answer = data.response || data.result?.response;
+
+    // Check if Gemma 4 returned a Thinking Block
+    // If thinking is enabled, the format is <|channel>thought\n [reasoning] <channel|> [answer]
+    if (answer && answer.includes('<channel|>')) {
+      answer = answer.split('<channel|>')[1].trim();
+    }
+
     if (answer) {
-      // Parse the final answer into HTML
+      // Use marked.parse() for formatting as set up in the previous step
       loading.innerHTML = marked.parse(answer);
+    } else if (data.error) {
+      loading.textContent = "AI Error: " + data.error;
     } else {
-      loading.textContent = "Error: No response received.";
+      console.error("Full AI Data:", data);
+      loading.textContent = "Error: Unexpected data format. Check browser console.";
     }
   } catch (err) {
     loading.className = 'ai-msg assistant';
