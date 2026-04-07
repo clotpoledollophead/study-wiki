@@ -1141,23 +1141,24 @@ async function sendAI() {
     const data = await res.json();
     loading.className = 'ai-msg assistant';
 
-    // Gemma 4 often nests the text in 'response' or 'result.response'
-    let answer = data.response || data.result?.response;
+    // 1. Try every known Cloudflare/Gemma 4 return path
+    let answer = data.response || 
+                 data.result?.response || 
+                 data.choices?.[0]?.message?.content ||
+                 data.result?.choices?.[0]?.message?.content;
 
-    // Check if Gemma 4 returned a Thinking Block
-    // If thinking is enabled, the format is <|channel>thought\n [reasoning] <channel|> [answer]
+    // 2. Handle Gemma 4's internal "Thinking/Channel" tags if present
     if (answer && answer.includes('<channel|>')) {
-      answer = answer.split('<channel|>')[1].trim();
+        answer = answer.split('<channel|>')[1].trim();
     }
 
     if (answer) {
-      // Use marked.parse() for formatting as set up in the previous step
-      loading.innerHTML = marked.parse(answer);
-    } else if (data.error) {
-      loading.textContent = "AI Error: " + data.error;
+        // Use marked.parse to render the Markdown we set up earlier
+        loading.innerHTML = marked.parse(answer);
     } else {
-      console.error("Full AI Data:", data);
-      loading.textContent = "Error: Unexpected data format. Check browser console.";
+        // If we still find nothing, print the JSON to the screen to see what happened
+        console.error("Cloudflare AI Raw Data:", data);
+        loading.textContent = "Error: Model returned data but no text found. Raw: " + JSON.stringify(data).slice(0, 100);
     }
   } catch (err) {
     loading.className = 'ai-msg assistant';
