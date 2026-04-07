@@ -494,8 +494,17 @@ function renderGraph() {
     });
   }
 
+  // Inside renderGraph() in app.js
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Get current theme colors from CSS
+    const style = getComputedStyle(document.body);
+    const colorPage = style.getPropertyValue('--graph-node-page').trim();
+    const colorTag = style.getPropertyValue('--graph-node-tag').trim();
+    const colorEdge = style.getPropertyValue('--graph-edge').trim();
+    const colorText = style.getPropertyValue('--graph-text').trim();
+
     ctx.save();
     ctx.translate(panX, panY);
 
@@ -504,7 +513,8 @@ function renderGraph() {
       if(!a||!b) return;
       ctx.beginPath();
       ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = e.wikilink ? 'rgba(124,109,250,0.4)' : 'rgba(255,255,255,0.1)';
+      // Use the dynamic edge color
+      ctx.strokeStyle = e.wikilink ? 'rgba(124,109,250,0.4)' : colorEdge;
       ctx.lineWidth = e.wikilink ? 1.5 : 1;
       ctx.stroke();
     });
@@ -512,17 +522,22 @@ function renderGraph() {
     graphNodes.forEach(n => {
       ctx.beginPath();
       ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-      ctx.fillStyle = n.type === 'page' ? '#7c6dfa' : '#3dba7e';
+      // Use the dynamic node colors
+      ctx.fillStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.globalAlpha = 0.85;
       ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = n.type === 'page' ? '#9d90fb' : '#5dca9e';
+      
+      // Add a slight border for better definition in Light Mode
+      ctx.strokeStyle = n.type === 'page' ? colorPage : colorTag;
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
       const maxLen = n.type === 'page' ? 14 : 10;
       const label = n.label.length > maxLen ? n.label.slice(0, maxLen)+'…' : n.label;
-      ctx.fillStyle = '#e8e8ea';
+      
+      // Use the dynamic text color
+      ctx.fillStyle = colorText;
       ctx.font = `${n.type==='page'?'11px':'10px'} "DM Sans", sans-serif`;
       ctx.textAlign = 'center';
       ctx.fillText(label, n.x, n.y + n.r + 12);
