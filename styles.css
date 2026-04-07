@@ -25,8 +25,11 @@
   --font-serif: 'Instrument Serif', Georgia, serif;
   --font-mono: 'DM Mono', monospace;
   --font-sans: 'DM Sans', sans-serif;
+  --graph-node-page: #7c6dfa;
+  --graph-node-tag: #3dba7e;
+  --graph-edge: rgba(255, 255, 255, 0.1);
+  --graph-text: #e8e8ea;
 
-  /* Add this at the very end of your :root block in styles.css */
   body.light-mode {
     --bg: #ffffff;
     --bg2: #f5f5f7;
@@ -37,6 +40,10 @@
     --text2: #424245;
     --text3: #86868b;
     --accent-glow: rgba(124,109,250,0.1);
+    --graph-node-page: #5748d4;   /* Darker purple for visibility */
+    --graph-node-tag: #2d8a5e;    /* Darker green for visibility */
+    --graph-edge: rgba(0, 0, 0, 0.1);
+    --graph-text: #1d1d1f;        /* Dark text for light background */
   }
 
   /* Fix for the AI panel and sidebar in light mode */
