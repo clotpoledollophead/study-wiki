@@ -1,20 +1,20 @@
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { env, request } = context;
   const { messages } = await request.json();
 
   try {
-    // Calling the exact Gemma 4 MoE model ID
-    const aiResponse = await env.AI.run('@cf/google/gemma-4-26b-a4b-it', {
-      messages: messages
+    // Official model ID for Gemma 4 MoE
+    const result = await env.AI.run('@cf/google/gemma-4-26b-a4b-it', {
+      messages: messages,
+      // Optional: Set a higher limit if your wiki context is long
+      max_tokens: 2048 
     });
 
-    // Log the response to your Cloudflare dashboard for debugging
-    console.log("AI Result:", JSON.stringify(aiResponse));
-
-    return new Response(JSON.stringify(aiResponse), {
+    return new Response(JSON.stringify(result), {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {
+    // Return the error to the frontend so you can see it in the console
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
