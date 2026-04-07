@@ -1113,17 +1113,18 @@ async function sendAI() {
     const data = await res.json();
     loading.className = 'ai-msg assistant';
 
-    // Gemma 4 on Workers AI returns the text in the 'response' field
-    if (data.response) {
-        loading.textContent = data.response;
-    } else if (data.result && data.result.response) {
-        loading.textContent = data.result.response;
+    // Check all possible locations where Gemma 4 stores the text
+    const answer = data.response || 
+                   data.result?.response || 
+                   data.choices?.[0]?.message?.content;
+
+    if (answer) {
+      loading.textContent = answer;
     } else {
-        loading.textContent = "Error: Model failed to generate a response.";
+      // This helps you see what actually came back if it's not 'answer'
+      console.error("Unexpected Data Structure:", data);
+      loading.textContent = "Error: Received unexpected data format from AI.";
     }
-    // Workers AI returns { response: "..." } or { result: { response: "..." } } 
-    // depending on the version; check the data structure:
-    loading.textContent = data.response || data.result?.response || "No response received.";
   } catch (err) {
     loading.className = 'ai-msg assistant';
     loading.textContent = 'Error: Could not reach Cloudflare Workers AI.';
