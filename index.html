@@ -83,6 +83,10 @@
         </div>
         <div class="editor-body">
           <textarea id="note-content" placeholder="Write your notes here…&#10;&#10;Markdown is supported. Reference [[other pages]] with double brackets.&#10;Use the AI panel to summarize, cross-reference, or extend your notes."></textarea>
+          <div id="mentions-panel">
+            <div class="mentions-header">Unlinked Mentions</div>
+            <div id="mentions-list"></div>
+          </div>
           <!-- AI panel -->
           <div id="ai-panel">
             <div class="ai-header">
@@ -153,6 +157,12 @@
       <div id="lint-results"></div>
     </div>
 
+    <div id="search-modal" class="modal-overlay" style="display:none;">
+      <div class="search-card">
+        <input type="text" id="global-search-input" placeholder="Search pages, content, or tags..." autofocus />
+        <div id="search-results"></div>
+      </div>
+    </div>
   </div><!-- /body -->
 </div><!-- /app -->
 
