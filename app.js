@@ -258,6 +258,46 @@ function doSave() {
   setTimeout(() => { if(document.getElementById('save-ind').textContent==='Saved') document.getElementById('save-ind').textContent=''; }, 2000);
 }
 
+document.getElementById('export-pdf-btn').addEventListener('click', exportToPDF);
+
+function exportToPDF() {
+  const p = userWiki()[currentPageId];
+  if (!p) return;
+
+  // 1. Create a temporary container for the PDF content
+  const element = document.createElement('div');
+  element.style.padding = '40px';
+  element.style.color = '#000'; // PDF usually looks better with dark text
+  element.style.fontFamily = 'sans-serif';
+
+  // 2. Format the content (Title + Rendered Markdown)
+  const htmlContent = `
+    <h1 style="font-size: 32px; margin-bottom: 10px;">${p.title}</h1>
+    <p style="color: #666; font-size: 12px; margin-bottom: 20px;">
+      Tags: ${p.tags.join(', ') || 'None'} | Updated: ${fmtDate(p.updated)}
+    </p>
+    <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+    <div class="pdf-body">
+      ${marked.parse(p.content)}
+    </div>
+  `;
+  element.innerHTML = htmlContent;
+
+  // 3. Configuration options for html2pdf
+  const opt = {
+    margin:       10,
+    filename:     `${p.title.replace(/\s+/g, '_')}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // 4. Generate and Save
+  html2pdf().set(opt).from(element).save();
+  
+  addLog('query', `Exported "${p.title}" to PDF`);
+}
+
 // ════════════════════════════════════════════════════
 //  AI PANEL
 // ════════════════════════════════════════════════════

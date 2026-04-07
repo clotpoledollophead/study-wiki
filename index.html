@@ -6,6 +6,7 @@
 <title>Study Wiki</title>
 <link rel="stylesheet" href="styles.css" />
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -72,6 +73,9 @@
             <input class="tag-add-input" id="tag-input" placeholder="+ tag" />
             <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
               <span class="save-indicator" id="save-ind"></span>
+              <button class="ai-open-btn" id="export-pdf-btn" style="background: var(--blue-bg); border-color: rgba(96,168,240,0.3); color: var(--blue);">
+                Export PDF
+              </button>
               <button class="ai-open-btn" id="ai-open-btn">✦ Ask AI</button>
             </div>
           </div>
