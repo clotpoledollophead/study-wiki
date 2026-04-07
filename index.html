@@ -1088,41 +1088,36 @@ async function sendAI() {
   if (!q) return;
   input.value = '';
   addAIMsg(q, 'user');
-  addLog('query', `AI query: "${q.slice(0,60)}${q.length>60?'…':''}"`);
 
-  const loading = addAIMsg('Thinking…', 'assistant loading');
+  const loading = addAIMsg('Gemma 4 is thinking...', 'assistant loading');
 
   const wiki = userWiki();
   const pages = Object.values(wiki);
-  const wikiCtx = pages.map(p => `### ${p.title}\nTags: ${(p.tags||[]).join(', ') || 'none'}\n${p.content.slice(0,800)}`).join('\n\n---\n\n');
-  const cur = wiki[currentPageId];
-  const sys = `You are a study wiki AI assistant. The user maintains a personal knowledge base and you help them build, summarize, and cross-reference it.
-
-Current wiki contents:
-${wikiCtx || '(empty)'}
-
-Currently open page: "${cur?.title || ''}"
-${cur?.content?.slice(0,1200) || ''}
-
-Guidelines:
-- Be concise and specific. Reference page titles when relevant.
-- When suggesting new content, write it in markdown so the user can copy it.
-- When finding connections, name the specific pages and explain how they relate.
-- When asked to write content, format it well with headers and bullet points.`;
+  const wikiCtx = pages.map(p => `### ${p.title}\n${p.content.slice(0,800)}`).join('\n\n---\n\n');
+  
+  const systemPrompt = `You are a study wiki AI assistant. Context:\n${wikiCtx}`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // UPDATED: Call your Cloudflare Function instead of Ollama
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: sys, messages: [{ role: 'user', content: q }] })
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: q }
+        ]
+      })
     });
+
     const data = await res.json();
-    const text = data.content?.find(b=>b.type==='text')?.text || 'No response.';
     loading.className = 'ai-msg assistant';
-    loading.textContent = text;
-  } catch {
+    // Workers AI returns { response: "..." } or { result: { response: "..." } } 
+    // depending on the version; check the data structure:
+    loading.textContent = data.response || data.result?.response || "No response received.";
+  } catch (err) {
     loading.className = 'ai-msg assistant';
-    loading.textContent = 'Could not reach AI. Check your connection.';
+    loading.textContent = 'Error: Could not reach Cloudflare Workers AI.';
   }
 }
 
