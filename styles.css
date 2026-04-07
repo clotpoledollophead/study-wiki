@@ -29,32 +29,31 @@
   --graph-node-tag: #3dba7e;
   --graph-edge: rgba(255, 255, 255, 0.1);
   --graph-text: #e8e8ea;
+}
 
-  body.light-mode {
-    --bg: #ffffff;
-    --bg2: #f5f5f7;
-    --bg3: #ececed;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.12);
-    --text: #1d1d1f;
-    --text2: #424245;
-    --text3: #86868b;
-    --accent-glow: rgba(124,109,250,0.1);
-    --graph-node-page: #5748d4;   /* Darker purple for visibility */
-    --graph-node-tag: #2d8a5e;    /* Darker green for visibility */
-    --graph-edge: rgba(0, 0, 0, 0.1);
-    --graph-text: #1d1d1f;        /* Dark text for light background */
-  }
-
-  /* Fix for the AI panel and sidebar in light mode */
-  body.light-mode #ai-panel, 
-  body.light-mode #sidebar {
+body.light-mode {
+  --bg: #ffffff;
+  --bg2: #f5f5f7;
+  --bg3: #ececed;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.12);
+  --text: #1d1d1f;
+  --text2: #424245;
+  --text3: #86868b;
+  --accent-glow: rgba(124,109,250,0.1);
+  --graph-node-page: #5748d4; 
+  --graph-node-tag: #2d8a5e;    
+  --graph-edge: rgba(0, 0, 0, 0.1);
+  --graph-text: #1d1d1f; /* This ensures the text is dark */
+}
+/* Fix for the AI panel and sidebar in light mode */
+body.light-mode #ai-panel, 
+body.light-mode #sidebar {
     background: var(--bg2);
 }
 
 body.light-mode textarea#note-content {
   color: #1d1d1f;
-}
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
