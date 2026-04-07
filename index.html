@@ -1112,6 +1112,15 @@ async function sendAI() {
 
     const data = await res.json();
     loading.className = 'ai-msg assistant';
+
+    // Gemma 4 on Workers AI returns the text in the 'response' field
+    if (data.response) {
+        loading.textContent = data.response;
+    } else if (data.result && data.result.response) {
+        loading.textContent = data.result.response;
+    } else {
+        loading.textContent = "Error: Model failed to generate a response.";
+    }
     // Workers AI returns { response: "..." } or { result: { response: "..." } } 
     // depending on the version; check the data structure:
     loading.textContent = data.response || data.result?.response || "No response received.";
