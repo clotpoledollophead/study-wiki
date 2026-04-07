@@ -755,6 +755,10 @@ themeBtn.addEventListener('click', () => {
     localStorage.setItem('theme', 'dark');
     addLog('edit', 'Switched to dark mode');
   }
+
+  if (currentView === 'graph') {
+    renderGraph();
+  }
 });
 
 // ════════════════════════════════════════════════════
